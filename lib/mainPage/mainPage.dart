@@ -1,5 +1,7 @@
 
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:cv_analyse/API/API.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,7 @@ import 'package:file_picker/file_picker.dart';
 
 String _filename = "";
 String filePath="";
-Future image;
+Uint8List image ;
 
 class MainPage extends StatefulWidget {
 
@@ -36,7 +38,11 @@ class _MainPageState extends State<MainPage> {
 
       setState((){_filename = filePath.split("/").last;});
       key.currentState.showSnackBar(snackBar);
-      image = GetData(file);
+      var result = Base64Decoder().convert(await GetData(file));
+      if(result != null){
+        setState((){image = result;});
+      }
+
     } on PlatformException catch (e) {
       print("Error while picking the file: " + e.toString());
     }
@@ -127,13 +133,13 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ],
                     ),
-                    child: _filename == ""
+                    child: image == null
                         ? Center(
                           child: Text("Upload your CV to see the result.", style: TextStyle(color: Colors.grey),),
                         )
                         :
                         Center(
-                          child: Text("Upload your CV to see the result."),
+                          child: Image.memory(image),
                         ),
 
                   ),
